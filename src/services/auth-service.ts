@@ -6,7 +6,8 @@ import { ApiError } from "@/lib/hono-adapter";
 import { addMinutes } from "date-fns";
 import { AuthToken, LoginRequest, RegisterRequest, ResetPasswordRequest, VerifyOtpRequest } from "@/types/auth";
 
-const jwtExpiresIn = parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN || "604800", 10);
+const jwtExpiresIn: number = parseInt(process.env.JWT_EXPIRES_IN || "7d");
+const jwtRefreshExpiresIn: number = parseInt(process.env.JWT_EXPIRES_IN || "40d");
 
 // Mock email service (replace with actual implementation)
 const sendEmail = async (to: string, subject: string, text: string) => {
@@ -19,13 +20,13 @@ export const generateAuthTokens = (userId: string, email: string, role: string):
     const accessToken = sign(
         { id: userId, email, role },
         process.env.JWT_SECRET as string,
-        { expiresIn: jwtExpiresIn }
+        { expiresIn: 60 * 60 * 24 * jwtExpiresIn }
     );
 
     const refreshToken = sign(
         { id: userId },
         process.env.REFRESH_TOKEN_SECRET as string,
-        { expiresIn: jwtExpiresIn }
+        { expiresIn: 60 * 60 * 24 * jwtRefreshExpiresIn }
     );
 
     return {
@@ -39,6 +40,7 @@ export const verifyAuthToken = (token: string) => {
     try {
         return verify(token, process.env.JWT_SECRET as string);
     } catch (error) {
+        console.log(error)
         throw new ApiError("Invalid or expired token", 401);
     }
 };

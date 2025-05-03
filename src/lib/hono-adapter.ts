@@ -4,8 +4,6 @@ import { HTTPException } from "hono/http-exception";
 import { logger } from "hono/logger";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
-import { validator } from "hono/validator";
-import type { Context, Next } from "hono";
 import { z } from "zod";
 
 export const createHonoApp = <E extends Env = any>() => {
@@ -81,26 +79,6 @@ export const zodValidator = <T extends z.ZodType>(schema: T) => {
         await next();
     };
 }
-
-// export const zodValidator = <T extends z.ZodType>(
-//     schema: T,
-//     target: "json" | "form" | "query" = "json"
-// ) => {
-//     return validator(target, (value, c) => {
-//         const result = schema.safeParse(value);
-//         if (!result.success) {
-//             return c.json(
-//                 {
-//                     success: false,
-//                     message: "Validation failed",
-//                     errors: result.error.errors,
-//                 },
-//                 400
-//             );
-//         }
-//         return result.data;
-//     });
-// }
 
 export class ApiError extends Error {
     status: number;
